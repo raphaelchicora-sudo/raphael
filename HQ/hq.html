@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Saga do Malte - HQ Histórica</title>
+    <meta name="description" content="História em quadrinhos sobre a trajetória dos pioneiros de Entre Rios e a cadeia do malte.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Kalam:wght@400;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --comic-yellow: #facc15;
+            --comic-red: #ef4444;
+            --comic-red-dark: #dc2626;
+            --comic-paper: #fdfaf0;
+            --comic-caption: #fffce0;
+            --comic-ink: #000;
+            --comic-white: #fff;
+            --comic-gray: #555;
+            --comic-text: #1f2937;
+            --comic-panel-bg: #e5e7eb;
+            --comic-shadow: 15px 15px 0 rgba(0, 0, 0, 0.15);
+            --comic-panel-shadow: 3px 3px 0 var(--comic-ink);
+            --comic-gap: 12px;
+            --comic-padding: 25px;
+            --comic-border: 6px;
+            --contrast-bg: #000;
+            --contrast-surface: #111;
+            --contrast-hover: #222;
+            --contrast-text: #fff;
+            --contrast-accent: #ff0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100dvh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            background: transparent;
+            color: var(--comic-ink);
+            font-family: 'Kalam', cursive;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--comic-yellow);
+            outline-offset: 3px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .main-wrapper {
+            width: min(100%, 900px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .comic-container {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            position: relative;
+            overflow: hidden;
+            background: var(--comic-paper);
+            border: var(--comic-border) solid var(--comic-ink);
+            box-shadow: var(--comic-shadow);
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: var(--comic-padding);
+            background: var(--comic-paper);
+            animation: pageFlip 0.45s ease-out;
+        }
+
+        .page.active:not([hidden]) {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes pageFlip {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .panel-grid {
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            grid-template-rows: repeat(3, minmax(0, 1fr));
+            gap: var(--comic-gap);
+        }
+
+        .comic-panel {
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            min-height: 0;
+            border: 3px solid var(--comic-ink);
+            background-color: var(--comic-panel-bg);
+            background-size: cover;
+            background-position: center;
+            box-shadow: var(--comic-panel-shadow);
+        }
+
+        .panel-full {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+        }
+
+        .panel-wide {
+            grid-column: span 7;
+            grid-row: 1 / -1;
+        }
+
+        .panel-narrow {
+            grid-column: span 5;
+            grid-row: 1 / -1;
+        }
+
+        .panel-half {
+            grid-column: span 6;
+            grid-row: 1 / -1;
+        }
+
+        .panel-top {
+            grid-column: 1 / -1;
+            grid-row: span 2;
+        }
+
+        .panel-bottom {
+            grid-column: 1 / -1;
+            grid-row: span 1;
+        }
+
+        #img_chegada { background-image: url('./imagens/hq_agraria_painel_3.png'); }
+        #img_trem { background-image: url('./imagens/hq_agraria_painel_1.png'); }
+        #img_caminhao { background-image: url('./imagens/hq_agraria_painel_2.png'); }
+        #img_colegio { background-image: url('./imagens/hq_agraria_painel_4.png'); }
+        #img_colonias { background-image: url('./imagens/hq_agraria_painel_6.png'); }
+        #img_trabalho { background-image: url('./imagens/hq_agraria_painel_5.png'); }
+        #img_uniao { background-image: url('./imagens/hq_agraria_painel_7.png'); }
+        #img_cevada { background-image: url('./imagens/hq_agraria_painel_8.png'); }
+        #img_fabrica { background-image: url('./imagens/hq_agraria_painel_9.png'); }
+        #img_brinde { background-image: url('./imagens/hq_agraria_painel_10.png'); }
+
+        .caption-box,
+        .bubble {
+            overflow-wrap: anywhere;
+        }
+
+        .caption-box {
+            position: absolute;
+            z-index: 10;
+            max-width: min(76%, 520px);
+            padding: 8px 12px;
+            background: var(--comic-caption);
+            border: 2px solid var(--comic-ink);
+            color: var(--comic-ink);
+            font-family: 'Permanent Marker', cursive;
+            font-size: 0.85rem;
+            line-height: 1.2;
+            box-shadow: 2px 2px 0 var(--comic-ink);
+        }
+
+        .caption-top-left {
+            top: 0;
+            left: 0;
+            border-top: none;
+            border-left: none;
+        }
+
+        .caption-bottom-right {
+            right: 0;
+            bottom: 0;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .caption-contrast {
+            background: var(--comic-ink);
+            color: var(--comic-white);
+        }
+
+        .bubble {
+            position: absolute;
+            z-index: 20;
+            max-width: 170px;
+            padding: 8px 12px;
+            border: 2px solid var(--comic-ink);
+            border-radius: 15px;
+            background: var(--comic-white);
+            color: var(--comic-ink);
+            filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.1));
+            font-weight: 700;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .bubble::after {
+            content: "";
+            position: absolute;
+            left: 20px;
+            bottom: -10px;
+            width: 0;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: var(--comic-ink) transparent;
+        }
+
+        .bubble-top-right {
+            top: 4rem;
+            right: 2.5rem;
+        }
+
+        .bubble-top-left {
+            top: 5rem;
+            left: 2.5rem;
+        }
+
+        .bubble-small-top-right {
+            top: 2.5rem;
+            right: 1rem;
+        }
+
+        .bubble-bottom-left {
+            bottom: 2.5rem;
+            left: 1rem;
+        }
+
+        .bubble-bottom-right {
+            right: 2.5rem;
+            bottom: 1rem;
+        }
+
+        .bubble-abrigo {
+            max-width: 150px;
+        }
+
+        .nav-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 0 10px;
+        }
+
+        .nav-btn {
+            min-width: 128px;
+            min-height: 46px;
+            padding: 10px 24px;
+            border: 3px solid var(--comic-ink);
+            background: var(--comic-red);
+            color: var(--comic-white);
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--comic-ink);
+            font-family: 'Bangers', cursive;
+            font-size: 1.35rem;
+            letter-spacing: 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--comic-ink);
+            background: var(--comic-red-dark);
+        }
+
+        .btn-prev {
+            background: var(--comic-gray);
+        }
+
+        .is-invisible {
+            visibility: hidden;
+        }
+
+        .cover-content,
+        .final-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .title-card {
+            max-width: 100%;
+            padding: 2rem;
+            border: 4px solid var(--comic-ink);
+            background: var(--comic-yellow);
+            box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.1);
+            transform: rotate(-1deg);
+        }
+
+        .cover-title,
+        .final-title {
+            margin: 0;
+            color: var(--comic-red);
+            font-family: 'Bangers', cursive;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .cover-title {
+            font-size: 5.7rem;
+        }
+
+        .cover-subtitle {
+            display: inline-block;
+            margin: 8px 0 0;
+            padding: 4px 16px;
+            background: var(--comic-ink);
+            color: var(--comic-white);
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .cover-description {
+            max-width: 540px;
+            margin: 32px 0 0;
+            color: var(--comic-text);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .final-image {
+            width: 100%;
+            height: 16rem;
+            margin-bottom: 16px;
+        }
+
+        .final-title {
+            font-size: 4.5rem;
+        }
+
+        .final-note {
+            margin-top: 16px;
+            padding: 16px;
+            border: 4px solid var(--comic-ink);
+            background: var(--comic-yellow);
+            transform: rotate(1deg);
+        }
+
+        .final-note p {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        body.high-contrast {
+            background: var(--contrast-bg);
+            color: var(--contrast-text);
+        }
+
+        body.high-contrast .comic-container,
+        body.high-contrast .page {
+            background: var(--contrast-bg);
+            border-color: var(--contrast-text);
+            box-shadow: none;
+        }
+
+        body.high-contrast .comic-panel {
+            background-color: var(--contrast-surface);
+            border-color: var(--contrast-text);
+            box-shadow: none;
+        }
+
+        body.high-contrast .caption-box,
+        body.high-contrast .bubble,
+        body.high-contrast .title-card,
+        body.high-contrast .final-note {
+            background: var(--contrast-surface);
+            color: var(--contrast-text);
+            border-color: var(--contrast-text);
+            box-shadow: none;
+            filter: none;
+        }
+
+        body.high-contrast .cover-title,
+        body.high-contrast .final-title,
+        body.high-contrast .cover-description,
+        body.high-contrast .cover-subtitle {
+            color: var(--contrast-accent);
+        }
+
+        body.high-contrast .cover-subtitle,
+        body.high-contrast .caption-contrast {
+            background: var(--contrast-bg);
+        }
+
+        body.high-contrast .nav-btn {
+            background: var(--contrast-surface);
+            color: var(--contrast-text);
+            border-color: var(--contrast-text);
+            box-shadow: none;
+        }
+
+        body.high-contrast .nav-btn:hover,
+        body.high-contrast .nav-btn:focus-visible {
+            background: var(--contrast-hover);
+            color: var(--contrast-accent);
+            border-color: var(--contrast-accent);
+        }
+
+        body.high-contrast .bubble::after {
+            border-color: var(--contrast-text) transparent;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+
+        @media (max-width: 720px) {
+            :root {
+                --comic-padding: 18px;
+                --comic-gap: 10px;
+                --comic-border: 5px;
+            }
+
+            body {
+                padding: 12px;
+            }
+
+            .main-wrapper {
+                gap: 14px;
+            }
+
+            .comic-container {
+                height: calc(100dvh - 82px);
+                min-height: 330px;
+                aspect-ratio: auto;
+            }
+
+            .cover-title {
+                font-size: 4rem;
+            }
+
+            .cover-subtitle,
+            .cover-description,
+            .final-note p {
+                font-size: 1rem;
+            }
+
+            .final-title {
+                font-size: 3.4rem;
+            }
+
+            .caption-box {
+                max-width: calc(100% - 16px);
+                font-size: 0.74rem;
+            }
+
+            .bubble {
+                max-width: 58%;
+                font-size: 0.72rem;
+            }
+        }
+
+        @media (max-width: 560px) {
+            :root {
+                --comic-padding: 12px;
+                --comic-gap: 8px;
+                --comic-border: 4px;
+            }
+
+            body {
+                padding: 8px;
+            }
+
+            .comic-container {
+                height: calc(100dvh - 72px);
+                min-height: 280px;
+                box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.15);
+            }
+
+            .panel-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: none;
+                grid-auto-rows: minmax(0, 1fr);
+            }
+
+            .panel-full,
+            .panel-wide,
+            .panel-narrow,
+            .panel-half,
+            .panel-top,
+            .panel-bottom {
+                grid-column: 1 / -1;
+                grid-row: auto;
+            }
+
+            .comic-panel {
+                border-width: 2px;
+                box-shadow: 2px 2px 0 var(--comic-ink);
+            }
+
+            .caption-box {
+                padding: 5px 7px;
+                font-size: 0.65rem;
+            }
+
+            .bubble {
+                max-width: 64%;
+                padding: 5px 7px;
+                border-radius: 12px;
+                font-size: 0.66rem;
+            }
+
+            .bubble::after {
+                display: none;
+            }
+
+            .bubble-top-right,
+            .bubble-small-top-right {
+                top: auto;
+                right: 0.5rem;
+                bottom: 0.5rem;
+            }
+
+            .bubble-top-left,
+            .bubble-bottom-left {
+                top: auto;
+                left: 0.5rem;
+                bottom: 0.5rem;
+            }
+
+            .bubble-abrigo {
+                max-width: 46%;
+                bottom: 3.2rem;
+            }
+
+            .bubble-bottom-right {
+                right: 0.5rem;
+                bottom: 0.5rem;
+            }
+
+            .title-card {
+                padding: 1.1rem;
+                box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);
+            }
+
+            .cover-content,
+            .final-content {
+                padding: 12px;
+            }
+
+            .cover-title {
+                font-size: 2.6rem;
+            }
+
+            .cover-subtitle {
+                padding: 4px 10px;
+                font-size: 0.85rem;
+            }
+
+            .cover-description {
+                margin-top: 18px;
+                font-size: 0.95rem;
+                line-height: 1.25;
+            }
+
+            .final-image {
+                height: 9rem;
+            }
+
+            .final-title {
+                font-size: 2.8rem;
+            }
+
+            .final-note {
+                padding: 10px;
+            }
+
+            .nav-bar {
+                gap: 10px;
+                padding: 0;
+            }
+
+            .nav-btn {
+                flex: 1;
+                min-width: 0;
+                min-height: 42px;
+                padding: 8px 10px;
+                font-size: 1rem;
+                box-shadow: 3px 3px 0 var(--comic-ink);
+            }
+        }
+
+        @media (max-width: 380px) {
+            .comic-container {
+                min-height: 250px;
+            }
+
+            .caption-box {
+                font-size: 0.58rem;
+                line-height: 1.15;
+            }
+
+            .bubble {
+                max-width: 70%;
+                font-size: 0.6rem;
+            }
+
+            .cover-title {
+                font-size: 2.2rem;
+            }
+
+            .cover-description {
+                font-size: 0.86rem;
+            }
+
+            .final-title {
+                font-size: 2.35rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="main-wrapper" aria-label="História em quadrinhos A Saga do Malte">
+        <div class="comic-container" id="comic-pages" aria-live="polite">
+            <section class="page active" id="p0" aria-label="Capa">
+                <div class="cover-content">
+                    <div class="title-card">
+                        <h1 class="cover-title">A SAGA DO MALTE</h1>
+                        <p class="cover-subtitle">Os Pioneiros de Entre Rios</p>
+                    </div>
+                    <p class="cover-description">Da Europa ao Colégio Visconde de Guarapuava: A épica jornada dos Suábios do Danúbio.</p>
+                </div>
+            </section>
+
+            <section class="page" id="p1" aria-label="Chegada ao Brasil" hidden>
+                <div class="panel-grid">
+                    <div class="comic-panel panel-full" id="img_chegada">
+                        <div class="caption-box caption-top-left">Junho de 1951. O Porto de Santos recebe os primeiros 222 pioneiros suábios.</div>
+                        <div class="bubble bubble-top-right">Adeus, velho mundo. Brasil, aqui depositamos nossa esperança!</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="p2" aria-label="Viagem até Guarapuava" hidden>
+                <div class="panel-grid">
+                    <div class="comic-panel panel-wide" id="img_trem">
+                        <div class="caption-box caption-top-left">Seguimos pelos trilhos da Estrada de Ferro até a Estação de Góis Artigas.</div>
+                    </div>
+                    <div class="comic-panel panel-narrow" id="img_caminhao">
+                        <div class="bubble bubble-bottom-left">O trajeto final é duro, de caminhão ou a pé.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="p3" aria-label="Primeiro abrigo em Guarapuava" hidden>
+                <div class="panel-grid">
+                    <div class="comic-panel panel-full" id="img_colegio">
+                        <div class="caption-box caption-top-left">Guarapuava nos acolhe no Colégio de Aplicação Visconde de Guarapuava.</div>
+                        <div class="bubble bubble-top-left bubble-abrigo">Este é nosso abrigo provisório enquanto preparamos a terra.</div>
+                        <div class="caption-box caption-bottom-right caption-contrast">Entre 1951 e 1952, o Colégio foi o primeiro lar de muitos.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="p4" aria-label="Formação das colônias" hidden>
+                <div class="panel-grid">
+                    <div class="comic-panel panel-top" id="img_colonias">
+                        <div class="caption-box caption-top-left">Partimos para as cinco colônias: Vitória, Jordãozinho, Cachoeira, Socorro e Samambaia.</div>
+                        <div class="bubble bubble-bottom-right">Hora de erguer nossas casas e colonizar!</div>
+                    </div>
+                    <div class="comic-panel panel-bottom" id="img_trabalho">
+                        <div class="caption-box caption-bottom-right">O trabalho braçal era a única forma de domar o campo.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="p5" aria-label="Cooperativa Agrária e cevada" hidden>
+                <div class="panel-grid">
+                    <div class="comic-panel panel-half" id="img_uniao">
+                        <div class="caption-box caption-top-left">Somente unidos venceríamos. Nasce a Cooperativa Agrária.</div>
+                    </div>
+                    <div class="comic-panel panel-half" id="img_cevada">
+                        <div class="bubble bubble-small-top-right">O malte da Agrária será conhecido no mundo todo!</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="p6" aria-label="Fábrica e tecnologia" hidden>
+                <div class="panel-grid">
+                    <div class="comic-panel panel-full" id="img_fabrica">
+                        <div class="caption-box caption-top-left">Hoje, Entre Rios é a capital mundial do malte de excelência.</div>
+                        <div class="bubble bubble-bottom-left">Tecnologia de ponta com o DNA dos pioneiros!</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page" id="p7" aria-label="Encerramento" hidden>
+                <div class="final-content">
+                    <div class="comic-panel final-image" id="img_brinde"></div>
+                    <h2 class="final-title">PROST!</h2>
+                    <div class="final-note">
+                        <p>A história dos suábios e da Agrária em cada gole.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <nav class="nav-bar" aria-label="Navegação da história em quadrinhos">
+            <button class="nav-btn btn-prev is-invisible" type="button" data-page-step="-1" id="prevBtn" aria-controls="comic-pages">ANTERIOR</button>
+            <span class="sr-only" id="pageStatus" aria-live="polite"></span>
+            <button class="nav-btn btn-next" type="button" data-page-step="1" id="nextBtn" aria-controls="comic-pages">PRÓXIMO</button>
+        </nav>
+    </main>
+
+    <script>
+        const MIN_FONT_SIZE = 14;
+        const MAX_FONT_SIZE = 20;
+        const pages = document.querySelectorAll('.page');
+        const prevButton = document.getElementById('prevBtn');
+        const nextButton = document.getElementById('nextBtn');
+        const pageStatus = document.getElementById('pageStatus');
+        const panelImages = [
+            './imagens/hq_agraria_painel_1.png',
+            './imagens/hq_agraria_painel_2.png',
+            './imagens/hq_agraria_painel_3.png',
+            './imagens/hq_agraria_painel_4.png',
+            './imagens/hq_agraria_painel_5.png',
+            './imagens/hq_agraria_painel_6.png',
+            './imagens/hq_agraria_painel_7.png',
+            './imagens/hq_agraria_painel_8.png',
+            './imagens/hq_agraria_painel_9.png',
+            './imagens/hq_agraria_painel_10.png'
+        ];
+        let currentPage = 0;
+
+        function preloadPanelImages() {
+            panelImages.forEach((src) => {
+                const image = new Image();
+                image.src = src;
+            });
+        }
+
+        function limitFontSize(fontSize) {
+            const numericFontSize = Number(fontSize);
+
+            if (!Number.isFinite(numericFontSize)) return 16;
+
+            return Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, numericFontSize));
+        }
+
+        function applyAccessibilityState(state) {
+            if (!state || state.type !== 'accessibility-state') return;
+
+            document.documentElement.style.fontSize = `${limitFontSize(state.fontSize)}px`;
+            document.body.classList.toggle('high-contrast', Boolean(state.highContrast));
+        }
+
+        function updatePageButtons() {
+            const isFirstPage = currentPage === 0;
+            const isLastPage = currentPage === pages.length - 1;
+
+            prevButton.classList.toggle('is-invisible', isFirstPage);
+            prevButton.disabled = isFirstPage;
+            prevButton.setAttribute('aria-hidden', String(isFirstPage));
+            nextButton.textContent = isLastPage ? 'RECOMEÇAR' : 'PRÓXIMO';
+            nextButton.setAttribute('aria-label', isLastPage ? 'Recomeçar história em quadrinhos' : 'Próxima página da história');
+
+            if (pageStatus) {
+                pageStatus.textContent = `Página ${currentPage + 1} de ${pages.length}`;
+            }
+        }
+
+        function updatePageAccessibility() {
+            pages.forEach((page, index) => {
+                const isActive = index === currentPage;
+
+                page.hidden = !isActive;
+                page.setAttribute('aria-hidden', String(!isActive));
+            });
+        }
+
+        function showPage(index) {
+            pages[currentPage].classList.remove('active');
+            currentPage = index;
+            pages[currentPage].classList.add('active');
+            updatePageButtons();
+            updatePageAccessibility();
+        }
+
+        function changePage(step) {
+            const nextPage = (currentPage + step + pages.length) % pages.length;
+            showPage(nextPage);
+        }
+
+        document.querySelectorAll('[data-page-step]').forEach((button) => {
+            button.addEventListener('click', () => {
+                changePage(Number(button.dataset.pageStep));
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') changePage(1);
+            if (event.key === 'ArrowLeft' && currentPage > 0) changePage(-1);
+        });
+
+        window.addEventListener('message', (event) => {
+            applyAccessibilityState(event.data);
+        });
+
+        preloadPanelImages();
+        updatePageButtons();
+        updatePageAccessibility();
+    </script>
+</body>
+</html>
